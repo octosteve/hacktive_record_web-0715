@@ -1,5 +1,15 @@
 module HacktiveRecord
   class Base
+    def self.inherited(base)
+      base.class_eval do
+        attr_accessor *columns
+      end
+    end
+    def self.new_from_row(row)
+      columns.each.with_object(new) do |column, a|
+        a.send("#{column}=", row[column.to_s])
+      end
+    end
     def self.table_name
        self.name.downcase + "s"
     end
@@ -38,6 +48,10 @@ module HacktiveRecord
 
     def placeholders
       ("?," * attribute_methods.count).chop
+    end
+
+    def attribute_methods
+      self.class.columns - [:id]
     end
 
     private
